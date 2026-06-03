@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>URL Health Dashboard</title>
+    <style>
+        body { font-family: Arial; background: #f5f6fa; }
+        h2 { text-align: centre; }
+        table {
+            width: 80%;
+            margin: auto;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: centre;
+        }
+        .up { color: green; font-weight: bold; }
+        .down { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<h2>🌐 URL Status Dashboard</h2>
+
+<table id="statusTable">
+    <tr>
+        <th>URL</th>
+        <th>Status</th>
+        <th>Response Time</th>
+    </tr>
+</table>
+
+<script>
+const urls = [
+    "https://pmm-au.nuancehdp.com/Nuance.healthcare.dmic.status/v1/status",
+    "https://pmm-au2.nuancehdp.com/Nuance.healthcare.dmic.status/v1/status",
+    "https://pmm-ca3.nuancehce.com/Nuance.healthcare.dmic.status/v1/status",
+];
+
+async function checkUrl(url) {
+    const start = performance.now();
+    try {
+        const response = await fetch(url, { mode: 'no-cors' });
+        const time = Math.round(performance.now() - start);
+
+        return { status: "UP", time: time };
+    } catch (error) {
+        return { status: "DOWN", time: "-" };
+    }
+}
+
+async function updateDashboard() {
+    const table = document.getElementById("statusTable");
+    table.innerHTML = `
+        <tr>
+            <th>URL</th>
+            <th>Status</th>
+            <th>Response Time</th>
+        </tr>`;
+
+    for (let url of urls) {
+        const result = await checkUrl(url);
+        table.innerHTML += `
+            <tr>
+                <td>${url}</td>
+                <td class="${result.status === "UP" ? "up" : "down"}">${result.status}</td>
+                <td>${result.time} ms</td>
+            </tr>`;
+    }
+}
+
+// Refresh every 10 seconds
+setInterval(updateDashboard, 10000);
+updateDashboard();
+</script>
+
+</body>
+</html>
